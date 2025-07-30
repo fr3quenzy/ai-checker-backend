@@ -1,5 +1,5 @@
 {
-  "name": "ai-checker-backend-v2",
+  "name": "ai-checker-backend-final",
   "version": "1.0.0",
   "description": "Backend server for the AI Overview Checker",
   "main": "server.js",
@@ -13,6 +13,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.7.0"
   }
 }
