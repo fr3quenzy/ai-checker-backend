@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Overview Checker (Live)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://css.gg/css?=|search|key|trash|eye|globe-alt" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .loader {
+            border-top-color: #ffffff;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .keyword-loader {
+            border-top-color: #4f46e5;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">AI Overview Checker (Live)</h1>
+            <p class="text-sm text-gray-500 mt-1">Created by Nayan Popatia</p>
+            <p class="text-gray-600 mt-4">Check if your domain appears in live AI-generated search overviews for a list of keywords.</p>
+        </header>
+
+        <main class="space-y-8">
+            <!-- Instructions -->
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            This tool now uses a backend server for live scraping. Make sure your backend server is running for this tool to work.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Overview & Domain Check -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-indigo-200">
+                <div class="flex items-center gap-3">
+                    <i class="gg-search text-indigo-600"></i>
+                    <h2 class="text-2xl font-bold text-gray-800">Run a Live Check</h2>
+                </div>
+                <form id="overview-form" class="mt-4">
+                    <div class="space-y-4">
+                        <div>
+                             <label for="region-select" class="block text-sm font-medium text-gray-700 mb-1">Google Region</label>
+                             <select id="region-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" required>
+                                <option value="" disabled selected>Select a Region</option>
+                                <option value="google.com">USA (google.com)</option>
+                                <option value="google.co.uk">United Kingdom (google.co.uk)</option>
+                                <option value="google.ca">Canada (google.ca)</option>
+                                <option value="google.com.au">Australia (google.com.au)</option>
+                                <option value="google.co.in">India (google.co.in)</option>
+                                <option value="google.de">Germany (google.de)</option>
+                                <option value="google.fr">France (google.fr)</option>
+                                <option value="google.co.jp">Japan (google.co.jp)</option>
+                                <option value="google.com.br">Brazil (google.com.br)</option>
+                             </select>
+                        </div>
+                        <div>
+                             <label for="domain-name" class="block text-sm font-medium text-gray-700 mb-1">Domain to Check</label>
+                             <input type="text" id="domain-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., amantelingerie.in" required>
+                        </div>
+                        <div>
+                             <label for="keywords-list" class="block text-sm font-medium text-gray-700 mb-1">Keywords (one per line)</label>
+                             <textarea id="keywords-list" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="difference between wired and non wired bra" required></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-right">
+                        <button type="submit" id="overview-button" class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition disabled:opacity-50">
+                            <span id="overview-button-text">Run Check</span>
+                            <div id="overview-loader" class="loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-5 w-5 ml-2 hidden"></div>
+                        </button>
+                    </div>
+                </form>
+                 <div id="overview-error-container" class="hidden mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert"></div>
+                <div id="overview-results-container" class="mt-6 hidden">
+                    <h3 class="text-xl font-semibold mb-3">Check Results:</h3>
+                    <div id="overview-results" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        // --- DOM Element References ---
+        const overviewForm = document.getElementById('overview-form');
+        const regionSelect = document.getElementById('region-select');
+        const domainNameInput = document.getElementById('domain-name');
+        const keywordsListInput = document.getElementById('keywords-list');
+        const overviewButton = document.getElementById('overview-button');
+        const overviewButtonText = document.getElementById('overview-button-text');
+        const overviewLoader = document.getElementById('overview-loader');
+        const overviewErrorContainer = document.getElementById('overview-error-container');
+        const overviewResultsContainer = document.getElementById('overview-results-container');
+        const overviewResults = document.getElementById('overview-results');
+
+        // --- Event Listeners ---
+        overviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const region = regionSelect.value;
+            if (!region) {
+                displayError("Please select a Google Region.", overviewErrorContainer);
+                return;
+            }
+
+            const domainName = domainNameInput.value.trim();
+            const keywords = keywordsListInput.value.trim().split('\n').filter(k => k.trim() !== '');
+
+            if (!domainName || keywords.length === 0) {
+                displayError("Domain Name and at least one Keyword are required.", overviewErrorContainer);
+                return;
+            }
+
+            setLoading(true, overviewButton, overviewButtonText, overviewLoader);
+            hideError(overviewErrorContainer);
+            overviewResults.innerHTML = '';
+            overviewResultsContainer.style.display = 'block';
+
+            for (const keyword of keywords) {
+                const resultEl = createOverviewResultCard(keyword);
+                overviewResults.appendChild(resultEl);
+                
+                try {
+                    // **NOTE:** Replace with your live Render server URL
+                    const backendUrl = 'https://ai-overview-checker-live.onrender.com/scrape'; 
+
+                    const response = await fetch(backendUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ keyword, domain: domainName, region })
+                    });
+
+                    // **FIX:** More robust error handling for non-JSON responses
+                    if (!response.ok) {
+                        const contentType = response.headers.get("content-type");
+                        let errorText;
+                        if (contentType && contentType.indexOf("application/json") !== -1) {
+                            const errorData = await response.json();
+                            errorText = errorData.error || 'Request to backend failed';
+                        } else {
+                            errorText = await response.text(); // Get HTML error page content
+                        }
+                        throw new Error(errorText);
+                    }
+
+                    const result = await response.json();
+                    updateOverviewResultCard(resultEl, result);
+
+                } catch (error) {
+                    console.error(`Error checking keyword ${keyword}:`, error);
+                    updateOverviewResultCard(resultEl, { keyword, error: error.message });
+                }
+            }
+            setLoading(false, overviewButton, overviewButtonText, overviewLoader);
+        });
+        
+        // --- UI Helper & Card Creation Functions ---
+        function createOverviewResultCard(keyword) {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-50 p-4 rounded-lg border';
+            card.innerHTML = `<div class="flex justify-between items-center"><p class="font-semibold text-gray-800">${escapeHTML(keyword)}</p><div class="loader keyword-loader"></div></div><div class="result-content mt-2 pt-2 border-t" style="display: none;"></div>`;
+            return card;
+        }
+
+        function updateOverviewResultCard(card, data) {
+            card.querySelector('.loader').style.display = 'none';
+            const resultContent = card.querySelector('.result-content');
+            if (data.error) {
+                 resultContent.innerHTML = `<p class="font-semibold text-red-700">Error:</p><pre class="text-red-600 text-sm whitespace-pre-wrap">${escapeHTML(data.error)}</pre>`;
+            } else {
+                let statusHtml;
+                if (data.found === 'not-applicable') {
+                    statusHtml = `<span class="text-xs font-medium bg-gray-200 text-gray-800 px-2.5 py-1 rounded-full">Not Applicable</span>`;
+                } else if (data.found) {
+                    statusHtml = `<span class="text-xs font-medium bg-green-100 text-green-800 px-2.5 py-1 rounded-full">✅ Found</span>`;
+                } else {
+                    statusHtml = `<span class="text-xs font-medium bg-red-100 text-red-800 px-2.5 py-1 rounded-full">❌ Not Found</span>`;
+                }
+
+                resultContent.innerHTML = `<div class="flex items-center gap-2 mb-2">${statusHtml}</div><div class="text-sm text-gray-700 bg-white p-3 rounded border leading-relaxed">${formatAIResponse(data.overviewText)}</div>`;
+            }
+            resultContent.style.display = 'block';
+        }
+        
+        // --- Utility Functions ---
+        function setLoading(isLoading, button, textEl, spinnerEl) { button.disabled = isLoading; textEl.style.display = isLoading ? 'none' : 'inline-block'; spinnerEl.style.display = isLoading ? 'inline-block' : 'none'; }
+        function displayError(message, container) { container.textContent = message; container.style.display = 'block'; }
+        function hideError(container) { container.style.display = 'none'; }
+        function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag)); }
+        
+        function formatAIResponse(text) {
+            if (!text) return '';
+            const escapedText = escapeHTML(text);
+            const boldedText = escapedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return boldedText.replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>

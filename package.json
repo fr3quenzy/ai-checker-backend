@@ -1,12 +1,11 @@
 {
-  "name": "ai-checker-backend",
+  "name": "ai-checker-backend-v2",
   "version": "1.0.0",
   "description": "Backend server for the AI Overview Checker",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
