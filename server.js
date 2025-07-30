@@ -54,10 +54,9 @@ app.post('/scrape', async (req, res) => {
         const $ = cheerio.load(html);
 
         // --- HTML Parsing ---
-        // **FIX:** Use a more specific selector to target the AI Overview.
-        // Google often uses a 'data-testid' for this element, which is more stable.
-        // This selector may need to be updated if Google changes its HTML structure.
-        const aiOverviewElement = $('[data-testid="ai-overview"]').first();
+        // **FIX:** Use a more resilient selector to find the AI Overview.
+        // This targets the first main result block within the primary results container.
+        const aiOverviewElement = $('div#rso > div[data-hveid]').first();
 
         if (aiOverviewElement.length === 0) {
             return res.json({
