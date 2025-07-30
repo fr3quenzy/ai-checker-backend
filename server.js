@@ -54,7 +54,10 @@ app.post('/scrape', async (req, res) => {
         const $ = cheerio.load(html);
 
         // --- HTML Parsing ---
-        const aiOverviewElement = $('[data-sgrd="true"]').first();
+        // **FIX:** Use a more specific selector to target the AI Overview.
+        // Google often uses a 'data-testid' for this element, which is more stable.
+        // This selector may need to be updated if Google changes its HTML structure.
+        const aiOverviewElement = $('[data-testid="ai-overview"]').first();
 
         if (aiOverviewElement.length === 0) {
             return res.json({
@@ -68,7 +71,7 @@ app.post('/scrape', async (req, res) => {
         const overviewText = aiOverviewElement.text();
         let found = false;
 
-        // **FIX:** Specifically check for the domain within citation links (<a> tags)
+        // Specifically check for the domain within citation links (<a> tags)
         aiOverviewElement.find('a').each((i, el) => {
             const href = $(el).attr('href');
             if (href && href.includes(cleanDomain)) {
