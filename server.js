@@ -29,7 +29,6 @@ app.post('/scrape', async (req, res) => {
 
     const searchUrl = `https://www.${region}/search?q=${encodeURIComponent(keyword)}&hl=en`;
     const cleanDomain = domain.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
-    const brandName = cleanDomain.split('.')[0];
 
     try {
         // --- Bright Data SERP API Call ---
@@ -65,10 +64,18 @@ app.post('/scrape', async (req, res) => {
             });
         }
         
+        // Get the plain text for display
         const overviewText = aiOverviewElement.text();
-        const lowerCaseOverview = overviewText.toLowerCase();
+        let found = false;
 
-        const found = lowerCaseOverview.includes(cleanDomain.toLowerCase()) || lowerCaseOverview.includes(brandName.toLowerCase());
+        // **FIX:** Specifically check for the domain within citation links (<a> tags)
+        aiOverviewElement.find('a').each((i, el) => {
+            const href = $(el).attr('href');
+            if (href && href.includes(cleanDomain)) {
+                found = true;
+                return false; // This stops the loop once a match is found
+            }
+        });
 
         res.json({ keyword, overviewText, found });
 
