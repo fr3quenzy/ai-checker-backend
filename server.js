@@ -1,28 +1,30 @@
-// --- File: server.js ---
+// AI Overview Checker - Backend Server (CommonJS Version for Compatibility)
 
 const express = require('express');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config(); // To use .env file
 
 const app = express();
+// Render provides the PORT environment variable.
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors()); // Allow requests from the front-end
 app.use(express.json());
 
+// Your Bright Data API Key from the .env file
 const BRIGHT_DATA_API_KEY = process.env.BRIGHT_DATA_API_KEY;
 
 app.post('/scrape', async (req, res) => {
     const { keyword, domain, region } = req.body;
 
     if (!BRIGHT_DATA_API_KEY) {
-        return res.status(500).json({ error: 'Bright Data API key is not configured on the server.' });
+        return res.status(500).json({ error: 'Bright Data API key is not configured on the server. Please check your .env file.' });
     }
     
     if (!keyword || !domain || !region) {
-        return res.status(400).json({ error: 'Missing required parameters.' });
+        return res.status(400).json({ error: 'Missing required parameters: keyword, domain, or region.' });
     }
 
     const searchUrl = `https://www.${region}/search?q=${encodeURIComponent(keyword)}&hl=en`;
@@ -30,6 +32,7 @@ app.post('/scrape', async (req, res) => {
     const brandName = cleanDomain.split('.')[0];
 
     try {
+        // --- Bright Data SERP API Call ---
         const response = await fetch('https://api.brightdata.com/request', {
             method: 'POST',
             headers: {
@@ -51,6 +54,7 @@ app.post('/scrape', async (req, res) => {
         const html = await response.text();
         const $ = cheerio.load(html);
 
+        // --- HTML Parsing ---
         const aiOverviewElement = $('[data-sgrd="true"]').first();
 
         if (aiOverviewElement.length === 0) {
@@ -63,6 +67,7 @@ app.post('/scrape', async (req, res) => {
         
         const overviewText = aiOverviewElement.text();
         const lowerCaseOverview = overviewText.toLowerCase();
+
         const found = lowerCaseOverview.includes(cleanDomain.toLowerCase()) || lowerCaseOverview.includes(brandName.toLowerCase());
 
         res.json({ keyword, overviewText, found });
@@ -76,24 +81,3 @@ app.post('/scrape', async (req, res) => {
 app.listen(port, () => {
     console.log(`AI Overview Checker backend listening at http://localhost:${port}`);
 });
-
-// --- File: package.json ---
-
-{
-  "name": "ai-checker-backend-v2",
-  "version": "1.0.0",
-  "description": "Backend server for the AI Overview Checker",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "node-fetch": "^3.3.2"
-  }
-}
