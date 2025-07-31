@@ -1,7 +1,7 @@
 {
-  "name": "ai-checker-backend-final",
+  "name": "ai-checker-backend-puppeteer",
   "version": "1.0.0",
-  "description": "Backend server for the AI Overview Checker",
+  "description": "Backend server for the AI Overview Checker using Puppeteer",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -9,10 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "node-fetch": "^2.7.0"
+    "puppeteer": "^22.12.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }
